@@ -1,0 +1,4 @@
+image:
+  repository: ghcr.io/rhdh-demo-gh/${{ values.name }}
+  pullPolicy: IfNotPresent
+  tag: "latest"
