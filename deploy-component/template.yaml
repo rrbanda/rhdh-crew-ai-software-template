@@ -23,7 +23,7 @@ spec:
             allowArbitraryValues: false
             catalogFilter:
               kind: Component
-        frameworkVersion:
+        environment:
           title: Framework Version
           type: string
           oneOf:
