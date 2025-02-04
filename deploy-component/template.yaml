@@ -3,7 +3,7 @@ kind: Template
 metadata:
   name: deploy-application
   title: Deploy Application to Environment
-  description: Request permission to deploy an application, by opening a PR.
+  description: Request permission to deploy a Component. Opens a PR for review.
 spec:
   owner: platform-engineering
   type: template
@@ -81,4 +81,4 @@ spec:
   output:
     links:
       - url: ${{ steps.openPullRequest.output.remoteUrl }}
-        title: Deploy Application Pull Request 
+        title: Deployment Pull Request 
