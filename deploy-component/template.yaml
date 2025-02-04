@@ -24,7 +24,7 @@ spec:
             catalogFilter:
               kind: Component
         environment:
-          title: Framework Version
+          title: Environment
           type: string
           oneOf:
             - title: "Production"
