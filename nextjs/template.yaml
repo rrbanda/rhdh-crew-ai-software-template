@@ -27,7 +27,6 @@ spec:
           type: string
           description: Description for the Component, and resulting Git repository
           maxLength: 100
-          pattern: '^([a-zA-Z][a-zA-Z0-9]*)(-[a-zA-Z0-9]+)*$'
         owner:
           title: Owner
           type: string
