@@ -3,7 +3,7 @@ kind: Template
 metadata:
   name: deploy-application
   title: Deploy Application to Environment
-  description: Request permission to deploy a Component. Opens a PR that requires approval by PE.
+  description: Request a Component deployment in an environment. Creates a PR that requires approval by PE.
 spec:
   owner: platform-engineering
   type: template
