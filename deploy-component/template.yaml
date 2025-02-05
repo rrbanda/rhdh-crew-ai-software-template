@@ -39,7 +39,6 @@ spec:
       name: Create File
       action: roadiehq:utils:fs:write
       input:
-        # The filename, e.g application.foo.yaml
         path: application.yaml
         content: |
           apiVersion: argoproj.io/v1alpha1
