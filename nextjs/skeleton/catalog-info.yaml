@@ -6,9 +6,9 @@ metadata:
   annotations:
     backstage.io/kubernetes-id: ${{ values.name }}
     backstage.io/kubernetes-label-selector: 'app.kubernetes.io/name=${{ values.name }}'
-    backstage.io/source-location: url:https://github/rhdh-demo-gh/${{ values.name }}
+    backstage.io/source-location: url:https://github.com/rhdh-demo-gh/${{ values.name }}
     backstage.io/techdocs-ref: .
-    gitlab.com/project-slug: rhdh-demo-gh/${{ values.name }}
+    github.com/project-slug: rhdh-demo-gh/${{ values.name }}
 spec:
   type: website
   system: ${{ values.system }}
