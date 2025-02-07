@@ -55,6 +55,7 @@ spec:
         values:
           name: ${{ parameters.name }}
           owner: ${{ parameters.owner }}
+          system: ${{ parameters.system }}
           description: ${{ parameters.description }}
 
     - id: publishSource
