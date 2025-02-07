@@ -70,7 +70,7 @@ spec:
       input:
         repoUrl: github.com?repo=app-of-apps&owner=rhdh-demo-gh
         title: "🤖 New Application (${{ parameters.environment }}): ${{ parameters.component | parseEntityRef | pick('name') }}"
-        description: "User *${{ user.entity.metadata.name }}* requests a new ${{ parameters.environment }} deployment for Component *${{ parameters.environment }}*! 🚀"
+        description: "User @${{ user.entity.metadata.name }} requests a new ${{ parameters.environment }} deployment for Component **${{ parameters.component | parseEntityRef | pick('name') }}**! 🚀"
         commitMessage: "feat: add application.yaml for ${{ parameters.component | parseEntityRef | pick('name') }}"
         sourcePath: ./
         targetPath: ./${{ parameters.component }}/${{ parameters.environment }}
