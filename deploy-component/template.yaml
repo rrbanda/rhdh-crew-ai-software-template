@@ -73,7 +73,7 @@ spec:
         description: "User @${{ user.entity.metadata.name }} requests a new ${{ parameters.environment }} deployment for Component **${{ parameters.component | parseEntityRef | pick('name') }}**! 🚀"
         commitMessage: "feat: add application.yaml for ${{ parameters.component | parseEntityRef | pick('name') }}"
         sourcePath: ./
-        targetPath: ./${{ parameters.component }}/${{ parameters.environment }}
+        targetPath: ./${{ parameters.environment }}/${{ parameters.component | parseEntityRef | pick('name') }}
         update: true
         branchName: add-${{ parameters.component | parseEntityRef | pick('name') }}
   
