@@ -52,11 +52,12 @@ spec:
           spec:
             project: default
             source:
-              repoURL: https://github.com/${{ parameters.component | parseEntityRef | pick('name') }}-manifests.git
+              repoURL: https://github.com/rhdh-demo-gh/${{ parameters.component | parseEntityRef | pick('name') }}-manifests.git
               targetRevision: main
+              path: ${{ parameters.environment }}
             destination:
               server: https://kubernetes.default.svc
-              namespace: ${{ parameters.name }}-${{ parameters.environment }}
+              namespace:${{ parameters.component | parseEntityRef | pick('name') }}-${{ parameters.environment }}
             syncPolicy:
               syncOptions:
               - CreateNamespace=true
