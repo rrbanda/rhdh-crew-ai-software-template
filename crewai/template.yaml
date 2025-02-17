@@ -47,7 +47,7 @@ spec:
               kind: System
   steps:
     - id: generateSource
-      name: Generate Next.js Application
+      name: Generate Crew AI Agent
       action: fetch:template
       input:
         url: ./skeleton
