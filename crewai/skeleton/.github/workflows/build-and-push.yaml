@@ -40,8 +40,7 @@ jobs:
         id: push
         uses: docker/build-push-action@v5
         with:
-          context: crewai/skeleton  # Specify the directory where the Containerfile is located
-          file: crewai/skeleton/Containerfile  # Explicitly define the Containerfile location
+          file: Containerfile  # Explicitly define the Containerfile location
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
