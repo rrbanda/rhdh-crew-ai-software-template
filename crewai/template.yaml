@@ -64,7 +64,7 @@ spec:
       input:
         allowedHosts: ['github.com']
         description: ${{ parameters.description }}
-        repoUrl: github.com?owner=rhdh-demo-gh&repo=${{ parameters.name }}
+        repoUrl: github.com?owner=rh-product-demos&repo=${{ parameters.name }}
         defaultBranch: main
         sourcePath: ./source
 
@@ -84,7 +84,7 @@ spec:
       input:
         allowedHosts: ['github.com']
         description: ${{ parameters.description }}
-        repoUrl: github.com?owner=rhdh-demo-gh&repo=${{ parameters.name }}-manifests
+        repoUrl: github.com?owner=rh-product-demos&repo=${{ parameters.name }}-manifests
         defaultBranch: main
         sourcePath: ./manifests
 
