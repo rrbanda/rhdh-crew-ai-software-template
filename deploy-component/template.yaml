@@ -52,7 +52,7 @@ spec:
           spec:
             project: default
             source:
-              repoURL: https://github.com/rhdh-demo-gh/${{ parameters.component | parseEntityRef | pick('name') }}-manifests.git
+              repoURL: https://github.com/rh-product-demos/${{ parameters.component | parseEntityRef | pick('name') }}-manifests.git
               targetRevision: main
               path: ${{ parameters.environment }}
             destination:
