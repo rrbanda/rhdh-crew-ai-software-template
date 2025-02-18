@@ -2,7 +2,7 @@ apiVersion: scaffolder.backstage.io/v1beta3
 kind: Template
 metadata:
   name: crewai-openshift
-  title: crewai on OpenShift
+  title: An example Crewai Agent on OpenShift
   description: Bootstraps a crewai based ai agent that can be deployed on OpenShift
 spec:
   owner: platform-engineering

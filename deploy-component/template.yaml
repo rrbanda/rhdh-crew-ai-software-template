@@ -45,7 +45,7 @@ spec:
           kind: Application
           metadata:
             name: ${{ parameters.component | parseEntityRef | pick('name') }}
-            namespace: argocd
+            namespace: openshift-gitops
             labels:
               environment: ${{ parameters.environment }}
               component: ${{ parameters.component | parseEntityRef | pick('name') }}
