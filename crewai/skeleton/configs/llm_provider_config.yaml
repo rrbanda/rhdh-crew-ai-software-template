@@ -1,0 +1,8 @@
+#  dynamic from .env
+
+llms:
+  default:
+    provider: "${LLM_PROVIDER}"  # Now dynamic from .env
+    base_url: "${LLM_BASE_URL}"
+    model_name: "${LLM_MODEL}"
+    api_key: "${LLM_API_KEY}"

@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: leopard-crossing-pod
+spec:
+  containers:
+    - name: leopard-crossing-api
+      image: quay.io/rbrhssa/leopard_pontdesarts:latest
+      ports:
+        - containerPort: 8000
+          hostPort: 8000  # ✅ Exposes container port to the host!
+      envFrom:
+        - configMapRef:
+            name: leopard-config
+      volumeMounts:
+        - name: chroma-db
+          mountPath: /opt/app-root/src/.local/chroma_db  # ✅ Persist ChromaDB storage
+  volumes:
+    - name: chroma-db
+      hostPath:
+        path: /var/lib/podman/volumes/chroma_db  # ✅ Persistent storage on host
+        type: DirectoryOrCreate  # ✅ Creates the directory if not present
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: leopard-config
+data:
+  LLM_BASE_URL: "https://deepseek-r1-distill-qwen-14b-maas-apicast-production.apps.prod.rhoai.rh-aiservices-bu.com:443"
+  LLM_MODEL: "deepseek-r1-distill-qwen-14b"
+  LLM_API_KEY: "0140f9510f51aeff125463b4600fdd7f"
+  FORMATTER_API_URL: "http://localhost:8001/process"
+  CHROMA_DB_PATH: "/opt/app-root/src/.local/chroma_db"
+  LOG_LEVEL: "INFO"

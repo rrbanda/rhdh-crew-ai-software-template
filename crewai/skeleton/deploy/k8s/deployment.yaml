@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: leopard-api
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: leopard-api
+          image: quay.io/rbrhssa/leopard_pontdesarts:latest
+          envFrom:
+            - configMapRef:
+                name: leopard-config
+            - secretRef:
+                name: leopard-secrets

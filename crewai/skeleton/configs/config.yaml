@@ -1,0 +1,8 @@
+formatter:
+  api_url: "${FORMATTER_API_URL}"
+
+chroma_db:
+  path: "${CHROMA_DB_PATH}"
+
+logging:
+  level: "${LOG_LEVEL}"
