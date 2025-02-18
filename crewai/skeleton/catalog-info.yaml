@@ -1,0 +1,16 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: ${{ values.name }}
+  description: ${{ values.description }}
+  annotations:
+    backstage.io/kubernetes-id: ${{ values.name }}
+    backstage.io/kubernetes-label-selector: 'app.kubernetes.io/name=${{ values.name }}'
+    backstage.io/source-location: url:https://github.com/rh-product-demos/${{ values.name }}
+    backstage.io/techdocs-ref: .
+    github.com/project-slug: rh-product-demos/${{ values.name }}
+spec:
+  type: website
+  system: ${{ values.system }}
+  lifecycle: dev
+  owner: ${{ values.owner }}
