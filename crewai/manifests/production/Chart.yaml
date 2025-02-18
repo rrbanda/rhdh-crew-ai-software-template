@@ -1,6 +1,6 @@
 apiVersion: v2
 name: ${{ values.name }}
-description: Deploys a Next.js application using the standard Node.js Chart
+description: Deploys a crewai agent using the standard Node.js Chart
 version: 0.1.0
 dependencies:
   - name: crewai-on-openshift
