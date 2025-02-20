@@ -25,15 +25,18 @@ RUN wget https://www.sqlite.org/2023/sqlite-autoconf-3410000.tar.gz && \
 # Ensure Python uses the correct SQLite version
 ENV LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH"
 ENV PATH="/usr/local/bin:$PATH"
-RUN python3 -c "import sqlite3; print('SQLite version:', sqlite3.sqlite_version)"  # Debugging check
 
-# ✅ Ensure group and user exist before adding, **but don't force UID 1001**
+# ✅ Create and set up a writable directory for SQLite
+RUN mkdir -p /opt/app-root/src/.crewai && \
+    chown -R 1001:0 /opt/app-root/src/.crewai && \
+    chmod -R 775 /opt/app-root/src/.crewai
+
+# ✅ Set environment variable to tell CrewAI to use this directory
+ENV CREWAI_STORAGE_PATH="/opt/app-root/src/.crewai"
+
+# ✅ Ensure group and user exist before adding
 RUN groupadd -r appgroup || true && \
     useradd -r -g appgroup appuser || true
-
-# Create necessary directories and fix permissions
-RUN mkdir -p /opt/app-root/src/.local/share/app && \
-    chown -R appuser:appgroup /opt/app-root/src/.local
 
 # Copy application files
 COPY . .
@@ -42,7 +45,7 @@ COPY . .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Set correct permissions for non-root user
+# ✅ Set correct permissions for non-root user
 RUN chown -R appuser:appgroup $APP_HOME && chmod -R 775 $APP_HOME
 
 # Switch to non-root user
@@ -51,5 +54,5 @@ USER appuser
 # Expose port for FastAPI
 EXPOSE 8000
 
-# Set default command
-CMD ["python", "-m", "src.main", "--mode", "api"]
+# ✅ Start the FastAPI application
+CMD ["uvicorn", "src.api:app", "--host", "0.0.0.0", "--port", "8000"]
