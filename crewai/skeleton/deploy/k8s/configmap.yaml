@@ -3,4 +3,10 @@ kind: ConfigMap
 metadata:
   name: leopard-config
 data:
-  FORMATTER_API_URL: "http://formatter-service:8001/process"
+  # LlamaStack Configuration
+  LLAMASTACK_BASE_URL: "https://lss-lss.apps.cluster-nngf2.dynamic.redhatworkshops.io/v1"
+  LLAMASTACK_MODEL: "remote-llm/llama-4-scout-17b-16e-w4a16"
+  
+  # Application Configuration
+  LOG_LEVEL: "INFO"
+  CONFIG_DIR: "/app/configs"

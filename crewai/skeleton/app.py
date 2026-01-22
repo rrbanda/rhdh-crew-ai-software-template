@@ -1,4 +1,14 @@
-from src.api import app  # ✅ Import FastAPI app from src/api
+"""
+Leopard Pont des Arts - CrewAI Application
+
+A multi-agent AI system that calculates how fast a leopard
+can cross the Pont des Arts bridge in Paris.
+
+Run with: python app.py
+Or: uvicorn src.api:app --reload
+"""
+
+from src.api import app
 
 if __name__ == "__main__":
     import uvicorn

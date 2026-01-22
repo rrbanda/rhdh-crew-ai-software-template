@@ -1,3 +1,49 @@
-leopard_task:
-  description: "How many seconds would it take for a leopard at full speed to run through Pont des Arts?"
-  expected_output: "Approximate time in seconds + brief reasoning"
+# CrewAI Task Configurations
+# These define what each agent should accomplish
+
+research_task:
+  description: |
+    Research and find the following factual information:
+    
+    1. What is the maximum running speed of a leopard in km/h?
+       - Look for scientifically documented top speeds
+       - Note: Leopards are one of the faster big cats
+    
+    2. What is the length of the Pont des Arts bridge in Paris in meters?
+       - This is a pedestrian bridge over the Seine River
+       - Look for official measurements
+    
+    Use the web search tool to find accurate, current information.
+    Report your findings clearly with the specific numbers.
+  
+  expected_output: |
+    A clear report containing:
+    - Leopard's maximum speed in km/h (with source if available)
+    - Pont des Arts bridge length in meters (with source if available)
+    - Any relevant notes about the data
+
+calculation_task:
+  description: |
+    Using the research data provided, calculate how many seconds
+    it would take for a leopard running at maximum speed to cross
+    the Pont des Arts bridge.
+    
+    Steps:
+    1. Take the leopard's speed in km/h from the research
+    2. Convert to m/s by dividing by 3.6
+    3. Take the bridge length in meters from the research
+    4. Apply the formula: Time (seconds) = Distance (meters) / Speed (m/s)
+    5. Round to 2 decimal places
+    
+    Show your calculations step by step.
+  
+  expected_output: |
+    A JSON response with the following structure:
+    {
+      "leopard_speed_kmh": <number>,
+      "leopard_speed_ms": <number>,
+      "bridge_length_meters": <number>,
+      "crossing_time_seconds": <number>,
+      "calculation": "<formula and steps shown>",
+      "explanation": "<brief human-readable explanation>"
+    }

@@ -1,111 +1,165 @@
-from fastapi import FastAPI, HTTPException
-from src.tasks import get_leopard_task
-from crewai import Crew
-import json
-import requests
-import logging
-import yaml
+"""
+FastAPI Application for Leopard Pont des Arts Calculator
+
+This API exposes the CrewAI multi-agent system that calculates
+how long it takes a leopard to cross the Pont des Arts bridge.
+"""
+
 import os
+import json
+import logging
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from crewai import Crew
 from dotenv import load_dotenv
 
-# ✅ Load .env for local development
+from src.llm import get_available_models, LLAMASTACK_BASE_URL, LLAMASTACK_MODEL
+from src.tasks import get_tasks
+
+# Load environment variables
 load_dotenv()
 
-logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"))
+# Configure logging
+logging.basicConfig(
+    level=os.getenv("LOG_LEVEL", "INFO"),
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
-app = FastAPI()
+# Initialize FastAPI
+app = FastAPI(
+    title="Leopard Pont des Arts API",
+    description="A CrewAI-powered API that calculates how fast a leopard can cross the Pont des Arts bridge",
+    version="2.0.0"
+)
 
-# ✅ Load configuration from environment variables or YAML file
-CONFIG_FILE_PATH = os.getenv("CONFIG_FILE", "/app/configs/config.yaml")
 
-config = {}
-if os.path.exists(CONFIG_FILE_PATH):
-    try:
-        with open(CONFIG_FILE_PATH, "r") as file:
-            config = yaml.safe_load(file) or {}
-    except Exception as e:
-        logger.error(f"❌ Error loading config file: {e}")
+class LeopardResult(BaseModel):
+    """Response model for leopard crossing calculation"""
+    leopard_speed_kmh: float | None = None
+    leopard_speed_ms: float | None = None
+    bridge_length_meters: float | None = None
+    crossing_time_seconds: float | None = None
+    calculation: str | None = None
+    explanation: str | None = None
+    raw_output: str | None = None
 
-# ✅ Function to load values from ENV with fallback to config.yaml
-def get_config_value(key_path: str, env_var: str, default=None):
-    """Retrieve config value from ENV or YAML with default fallback."""
-    env_value = os.getenv(env_var)
-    if env_value:
-        return env_value
 
-    keys = key_path.split(".")
-    temp_config = config
-    for key in keys:
-        if isinstance(temp_config, dict):
-            temp_config = temp_config.get(key, None)
-        else:
-            return default
+class HealthResponse(BaseModel):
+    """Health check response"""
+    status: str
+    llm_url: str
+    llm_model: str
 
-    return temp_config if temp_config is not None else default
 
-# ✅ Load LLM API configurations
-LLM_API_KEY = get_config_value("llm.api_key", "LLM_API_KEY", None)  # Optional API key
-LLM_MODEL_NAME = get_config_value("llm.model_name", "LLM_MODEL", "deepseek-r1-distill-qwen-14b")
-LLM_BASE_URL = get_config_value("llm.base_url", "LLM_BASE_URL")
-FORMATTER_URL = get_config_value("formatter.api_url", "FORMATTER_API_URL", "http://localhost:8001/process")
+class ModelsResponse(BaseModel):
+    """Available models response"""
+    models: list[str]
 
-# ✅ Debug Logs
-logger.info(f"🔍 Loaded LLM_MODEL: {LLM_MODEL_NAME}")
-logger.info(f"🔍 Loaded LLM_BASE_URL: {LLM_BASE_URL}")
-logger.info(f"🔍 LLM_API_KEY: {'SET' if LLM_API_KEY else 'NOT SET'}")
 
-@app.get("/")
+@app.get("/", tags=["General"])
 def home():
-    """Basic home endpoint."""
-    return {"message": "Leopard Pont des Arts API is running!"}
+    """Root endpoint with API information."""
+    return {
+        "message": "Leopard Pont des Arts API is running!",
+        "version": "2.0.0",
+        "endpoints": {
+            "/health": "Health check",
+            "/models": "List available LlamaStack models",
+            "/leopard-crossing": "Calculate leopard crossing time"
+        }
+    }
 
-@app.get("/health")
+
+@app.get("/health", response_model=HealthResponse, tags=["General"])
 def health():
-    """Health check endpoint to verify API readiness."""
-    return {"status": "ok"}
+    """Health check endpoint with LLM configuration info."""
+    return HealthResponse(
+        status="ok",
+        llm_url=LLAMASTACK_BASE_URL,
+        llm_model=LLAMASTACK_MODEL
+    )
 
-@app.get("/leopard-crossing")
+
+@app.get("/models", response_model=ModelsResponse, tags=["General"])
+def list_models():
+    """List available models from LlamaStack."""
+    models = get_available_models()
+    return ModelsResponse(models=models)
+
+
+@app.get("/leopard-crossing", tags=["Calculation"])
 def leopard_crossing():
-    """Returns raw agent response."""
-    return execute_leopard_task()
-
-@app.get("/leopard-crossing-ui")
-def leopard_crossing_ui():
-    """Returns formatted agent response via Formatter API."""
-    raw_result = execute_leopard_task()
-    return call_formatter(raw_result)
-
-def call_formatter(data):
-    """Send response to the external formatter service if available."""
-    payload = {"format": "json", "data": data}
+    """
+    Calculate how many seconds it takes for a leopard to cross Pont des Arts.
+    
+    This endpoint triggers a CrewAI crew with two agents:
+    1. A Researcher agent that searches for factual data
+    2. A Calculator agent that computes the crossing time
+    
+    The agents collaborate using CrewAI's built-in orchestration.
+    """
     try:
-        response = requests.post(FORMATTER_URL, json=payload, headers={"Content-Type": "application/json"}, timeout=10)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        logger.error(f"❌ Formatter service request error: {e}")
-        return data  # Fallback to raw response
-
-def execute_leopard_task():
-    """Runs the CrewAI agent and returns computed response."""
-    if not LLM_BASE_URL:
-        return {"error": "Missing LLM API URL in config"}
-
-    task = get_leopard_task()
-    crew = Crew(agents=[task.agent], tasks=[task], verbose=True)
-
-    try:
+        logger.info("🚀 Starting CrewAI execution...")
+        
+        # Get agents and tasks
+        agents, tasks = get_tasks()
+        
+        # Create the crew
+        crew = Crew(
+            agents=agents,
+            tasks=tasks,
+            verbose=True  # Enable detailed logging
+        )
+        
+        # Execute the crew
+        logger.info("🐆 Kicking off the Leopard Crossing Crew...")
         result = crew.kickoff()
-        return json.loads(result.raw) if hasattr(result, "raw") else {"error": "Unexpected response"}
-    except json.JSONDecodeError:
-        logger.error("❌ Invalid JSON response from CrewAI")
-        return {"error": "Invalid JSON response"}
+        
+        logger.info(f"✅ Crew execution completed")
+        logger.info(f"📄 Raw result: {result}")
+        
+        # Try to parse as JSON, otherwise return raw
+        try:
+            if hasattr(result, 'raw'):
+                parsed = json.loads(result.raw)
+            else:
+                parsed = json.loads(str(result))
+            return parsed
+        except json.JSONDecodeError:
+            # Return as raw output if not valid JSON
+            return {
+                "raw_output": str(result.raw) if hasattr(result, 'raw') else str(result),
+                "explanation": "Result was not in JSON format"
+            }
+            
     except Exception as e:
-        logger.error(f"❌ CrewAI Execution Error: {e}")
-        return {"error": "Internal error while executing task"}
+        logger.error(f"❌ CrewAI execution failed: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to execute crew: {str(e)}"
+        )
 
-# ✅ Ensure `app` is available when running `uvicorn src.api:app`
+
+@app.get("/leopard-crossing/simple", tags=["Calculation"])
+def leopard_crossing_simple():
+    """
+    Simplified endpoint that returns just the key metrics.
+    
+    Returns only the crossing time and a brief explanation.
+    """
+    result = leopard_crossing()
+    
+    if "error" in result or "raw_output" in result:
+        return result
+    
+    return {
+        "crossing_time_seconds": result.get("crossing_time_seconds"),
+        "explanation": result.get("explanation", result.get("calculation"))
+    }
+
+
+# Run with uvicorn if executed directly
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -1,42 +1,21 @@
-# Use Red Hat UBI9 as the base image
+# Leopard Pont des Arts - CrewAI Multi-Agent Application
+# Base image: Red Hat UBI9 Python 3.11
+
 FROM registry.access.redhat.com/ubi9/python-311:latest
 
 # Set environment variables
 ENV APP_HOME=/app
+ENV CONFIG_DIR=/app/configs
+ENV PYTHONUNBUFFERED=1
+
 WORKDIR $APP_HOME
 
 # Ensure root permissions during installation
 USER root
 
-# Install build dependencies for SQLite compilation
-RUN dnf install -y gcc make tar wget gzip && \
+# Install system dependencies
+RUN dnf install -y gcc make && \
     dnf clean all
-
-# Manually install SQLite 3.41+
-RUN wget https://www.sqlite.org/2023/sqlite-autoconf-3410000.tar.gz && \
-    tar -xvzf sqlite-autoconf-3410000.tar.gz && \
-    cd sqlite-autoconf-3410000 && \
-    ./configure --prefix=/usr/local && \
-    make -j$(nproc) && make install && \
-    cd .. && rm -rf sqlite-autoconf-3410000 sqlite-autoconf-3410000.tar.gz && \
-    ldconfig && \
-    sqlite3 --version  # Verify installation
-
-# Ensure Python uses the correct SQLite version
-ENV LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH"
-ENV PATH="/usr/local/bin:$PATH"
-
-# ✅ Create and set up a writable directory for SQLite
-RUN mkdir -p /opt/app-root/src/.crewai && \
-    chown -R 1001:0 /opt/app-root/src/.crewai && \
-    chmod -R 775 /opt/app-root/src/.crewai
-
-# ✅ Set environment variable to tell CrewAI to use this directory
-ENV CREWAI_STORAGE_PATH="/opt/app-root/src/.crewai"
-
-# ✅ Ensure group and user exist before adding
-RUN groupadd -r appgroup || true && \
-    useradd -r -g appgroup appuser || true
 
 # Copy application files
 COPY . .
@@ -45,14 +24,21 @@ COPY . .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# ✅ Set correct permissions for non-root user
-RUN chown -R appuser:appgroup $APP_HOME && chmod -R 775 $APP_HOME
+# Create non-root user and set permissions
+RUN groupadd -r appgroup || true && \
+    useradd -r -g appgroup appuser || true && \
+    chown -R appuser:appgroup $APP_HOME && \
+    chmod -R 775 $APP_HOME
 
 # Switch to non-root user
 USER appuser
 
-# Expose port for FastAPI
+# Expose FastAPI port
 EXPOSE 8000
 
-# ✅ Start the FastAPI application
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Start the FastAPI application
 CMD ["uvicorn", "src.api:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -1,8 +1,17 @@
-formatter:
-  api_url: "${FORMATTER_API_URL}"
+# Application Configuration
+# Environment variables take precedence over these values
 
-chroma_db:
-  path: "${CHROMA_DB_PATH}"
+# LlamaStack LLM Configuration
+llamastack:
+  base_url: "${LLAMASTACK_BASE_URL:-https://lss-lss.apps.cluster-nngf2.dynamic.redhatworkshops.io/v1}"
+  model: "${LLAMASTACK_MODEL:-remote-llm/llama-4-scout-17b-16e-w4a16}"
+  api_key: "${LLAMASTACK_API_KEY:-}"
 
+# Logging Configuration
 logging:
-  level: "${LOG_LEVEL}"
+  level: "${LOG_LEVEL:-INFO}"
+
+# API Configuration
+api:
+  host: "${API_HOST:-0.0.0.0}"
+  port: "${API_PORT:-8000}"
